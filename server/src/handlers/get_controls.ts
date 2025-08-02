@@ -1,8 +1,17 @@
 
+import { db } from '../db';
+import { controlsTable } from '../db/schema';
 import { type Control } from '../schema';
 
 export const getControls = async (): Promise<Control[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all control measures from the database.
-    return [];
+  try {
+    const result = await db.select()
+      .from(controlsTable)
+      .execute();
+
+    return result;
+  } catch (error) {
+    console.error('Failed to fetch controls:', error);
+    throw error;
+  }
 };

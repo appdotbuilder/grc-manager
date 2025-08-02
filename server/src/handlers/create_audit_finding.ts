@@ -1,11 +1,13 @@
 
+import { db } from '../db';
+import { auditFindingsTable } from '../db/schema';
 import { type CreateAuditFindingInput, type AuditFinding } from '../schema';
 
 export const createAuditFinding = async (input: CreateAuditFindingInput): Promise<AuditFinding> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new audit finding record and persisting it in the database.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+  try {
+    // Insert audit finding record
+    const result = await db.insert(auditFindingsTable)
+      .values({
         title: input.title,
         description: input.description,
         status: input.status,
@@ -15,8 +17,14 @@ export const createAuditFinding = async (input: CreateAuditFindingInput): Promis
         auditor: input.auditor,
         audit_date: input.audit_date,
         due_date: input.due_date,
-        remediation_plan: input.remediation_plan,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as AuditFinding);
+        remediation_plan: input.remediation_plan
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Audit finding creation failed:', error);
+    throw error;
+  }
 };

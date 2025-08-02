@@ -1,18 +1,31 @@
 
+import { db } from '../db';
+import { assetsTable } from '../db/schema';
 import { type CreateAssetInput, type Asset } from '../schema';
 
 export const createAsset = async (input: CreateAssetInput): Promise<Asset> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new asset record and persisting it in the database.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+  try {
+    // Insert asset record
+    const result = await db.insert(assetsTable)
+      .values({
         name: input.name,
         description: input.description,
         asset_type: input.asset_type,
-        value: input.value,
+        value: input.value ? input.value.toString() : null, // Convert number to string for numeric column
         owner: input.owner,
-        location: input.location,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Asset);
+        location: input.location
+      })
+      .returning()
+      .execute();
+
+    // Convert numeric fields back to numbers before returning
+    const asset = result[0];
+    return {
+      ...asset,
+      value: asset.value ? parseFloat(asset.value) : null // Convert string back to number
+    };
+  } catch (error) {
+    console.error('Asset creation failed:', error);
+    throw error;
+  }
 };

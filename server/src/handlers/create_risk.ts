@@ -1,11 +1,12 @@
 
+import { db } from '../db';
+import { risksTable } from '../db/schema';
 import { type CreateRiskInput, type Risk } from '../schema';
 
 export const createRisk = async (input: CreateRiskInput): Promise<Risk> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new risk assessment and persisting it in the database.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+  try {
+    const result = await db.insert(risksTable)
+      .values({
         name: input.name,
         description: input.description,
         risk_level: input.risk_level,
@@ -13,8 +14,14 @@ export const createRisk = async (input: CreateRiskInput): Promise<Risk> => {
         impact: input.impact,
         control_id: input.control_id,
         owner: input.owner,
-        mitigation_strategy: input.mitigation_strategy,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Risk);
+        mitigation_strategy: input.mitigation_strategy
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Risk creation failed:', error);
+    throw error;
+  }
 };

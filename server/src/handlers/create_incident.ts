@@ -1,11 +1,13 @@
 
+import { db } from '../db';
+import { incidentsTable } from '../db/schema';
 import { type CreateIncidentInput, type Incident } from '../schema';
 
 export const createIncident = async (input: CreateIncidentInput): Promise<Incident> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new incident record and persisting it in the database.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+  try {
+    // Insert incident record
+    const result = await db.insert(incidentsTable)
+      .values({
         title: input.title,
         description: input.description,
         severity: input.severity,
@@ -16,8 +18,14 @@ export const createIncident = async (input: CreateIncidentInput): Promise<Incide
         root_cause: input.root_cause,
         remediation_actions: input.remediation_actions,
         reporter: input.reporter,
-        assigned_to: input.assigned_to,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Incident);
+        assigned_to: input.assigned_to
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Incident creation failed:', error);
+    throw error;
+  }
 };
